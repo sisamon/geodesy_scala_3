@@ -113,9 +113,9 @@ object CoordinatesImplicits:
    * These are some implicit conversions that will be handy.
    */
   import squants.space.AngleConversions.AngleConversions
-//  given Conversion[Angle, Double] = _.degrees
+  given Conversion[Angle, Double] = _.toDegrees
 
-  given Conversion[Double, Angle] = _.toDegrees
+  given Conversion[Double, Angle] = _.degrees
 
   given Conversion[Angle, Latitude] = Latitude.unsafeMake(_)
 
