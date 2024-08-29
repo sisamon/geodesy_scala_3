@@ -1,0 +1,5 @@
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m-- Deprecation Warning: /Volumes/LaCie/PROJECTS/Codigo CAPEX/piecemeal/src/main/scala/a3/capex/EarthGeometry/EarthGeometryModel.scala:250:51 [0m[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m250 |[0m    [33moverride[0m [33mdef[0m toString: String = latitude.value + [31m", "[0m + longitude.value [34m// "(" + + ")"[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m[33m    |[0m                                    ^^^^^^^^^^^^^^^^[0m[0m
+[0m[[0m[33mwarn[0m] [0m[0m[33m    |[0m[33mmethod[0m [35m+[0m in [33mclass[0m [35mDouble[0m is deprecated since 2.13.0: Adding a number and a String is deprecated. Use the string interpolation `s"$num$str"`[0m
+[0m[[0m[33mwarn[0m] [0m[0mone warning found[0m

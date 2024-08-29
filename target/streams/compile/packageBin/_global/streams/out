@@ -1,0 +1,19 @@
+[0m[[0m[0mdebug[0m] [0m[0mPackaging /Volumes/LaCie/PROJECTS/Codigo CAPEX/piecemeal/target/scala-3.3.0/capex_optimization_3-0.1.0-SNAPSHOT.jar ...[0m
+[0m[[0m[0mdebug[0m] [0m[0mInput file mappings:[0m
+[0m[[0m[0mdebug[0m] [0m[0m	org[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Volumes/LaCie/PROJECTS/Codigo CAPEX/piecemeal/target/scala-3.3.0/classes/org[0m
+[0m[[0m[0mdebug[0m] [0m[0m	org/a3[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Volumes/LaCie/PROJECTS/Codigo CAPEX/piecemeal/target/scala-3.3.0/classes/org/a3[0m
+[0m[[0m[0mdebug[0m] [0m[0m	org/a3/capex[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Volumes/LaCie/PROJECTS/Codigo CAPEX/piecemeal/target/scala-3.3.0/classes/org/a3/capex[0m
+[0m[[0m[0mdebug[0m] [0m[0m	org/a3/capex/main$package$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Volumes/LaCie/PROJECTS/Codigo CAPEX/piecemeal/target/scala-3.3.0/classes/org/a3/capex/main$package$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	org/a3/capex/main$package.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Volumes/LaCie/PROJECTS/Codigo CAPEX/piecemeal/target/scala-3.3.0/classes/org/a3/capex/main$package.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	org/a3/capex/main.tasty[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Volumes/LaCie/PROJECTS/Codigo CAPEX/piecemeal/target/scala-3.3.0/classes/org/a3/capex/main.tasty[0m
+[0m[[0m[0mdebug[0m] [0m[0m	org/a3/capex/main.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Volumes/LaCie/PROJECTS/Codigo CAPEX/piecemeal/target/scala-3.3.0/classes/org/a3/capex/main.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	org/a3/capex/main$package.tasty[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Volumes/LaCie/PROJECTS/Codigo CAPEX/piecemeal/target/scala-3.3.0/classes/org/a3/capex/main$package.tasty[0m
+[0m[[0m[0mdebug[0m] [0m[0mDone packaging.[0m
