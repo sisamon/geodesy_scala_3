@@ -1,0 +1,56 @@
+# Scala build
+*.class
+*.log
+.cache
+.history
+.lib/
+dist/*
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+target/
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+.ensime
+.ensime_cache/
+.ensime_lucene
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules
+
+# VS Code
+.vscode/
+.metals/
+.bloop/
+
+# sbt specific
+.DS_Store
+.history/
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+
+# Jupyter notebook
+.ipynb_checkpoints
+
+# For VS Code Metals
+.metals/
+.bloop/
+
+# For mill
+out/
