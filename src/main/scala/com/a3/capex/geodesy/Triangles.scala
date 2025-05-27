@@ -2,10 +2,8 @@ package com.a3.capex.geodesy
 
 import Coordinates.{Latitude, Longitude, R}
 import ShapesCore._
-import TypeclassInstances.{given, _}
-import squants.space.{Angle, Degrees, Length, SquareMeters, Area}
-import squants.space.AngleConversions._
-import squants.space.LengthConversions._
+import TypeclassInstances.given
+import squants.space.{Angle, Length, Area, SquareMeters}
 import java.lang.Math._
 import scala.annotation.tailrec
 import neotype._

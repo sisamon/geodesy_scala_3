@@ -1,10 +1,7 @@
 package com.a3.capex.geodesy
 
-import squants.space.{Angle, Length, Meters}
-import squants.space.AngleConversions._
-import squants.space.LengthConversions._
+import squants.space.{Angle, Length}
 import Coordinates._
-import ShapesCore.Point
 import neotype.unwrap
 
 /**

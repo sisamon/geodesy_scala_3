@@ -1,9 +1,12 @@
 package com.a3.capex.geodesy
 
-import Coordinates.{Latitude, Longitude, *}
+import Coordinates.{Latitude, Longitude, zero, R}
 import TypeclassInstances.given
-import squants.space.{Angle, Area, Degrees, Kilometers, Length, SquareMeters}
+import squants.space.{Angle, Area, Length, SquareMeters}
 import squants.space.AngleConversions.*
+// Define type aliases for the opaque types
+type LatitudeKey = Long
+type LongitudeKey = Long
 
 import java.lang.Math.*
 import neotype.*
@@ -238,12 +241,12 @@ object ShapesCore:
   object Point:
 
     val zeroPoint: Point = Point(Latitude.unsafeMake(zero), Longitude.unsafeMake(zero))
-    val lon: Option[LongitudeKey] = None
-    val lat: Option[LongitudeKey] = None
+    val lon: Option[Coordinates.LongitudeKey] = None
+    val lat: Option[Coordinates.LongitudeKey] = None
     // With this we should be able to use points as keys
     // Should this be part of an object or a normal case class , and why TODO
-    case class PointGrid(latitude: LatitudeKey, longitude: LongitudeKey)
-    case class PointKey(latitude: LatitudeKey, longitude: LongitudeKey)
+    case class PointGrid(latitude: Coordinates.LatitudeKey, longitude: Coordinates.LongitudeKey)
+    case class PointKey(latitude: Coordinates.LatitudeKey, longitude: Coordinates.LongitudeKey)
 
     def onSegment(p: Point, q: Point, r: Point): Boolean =
       q.latitude <= p.latitude.max(r.latitude) && // ~List(p.latitude, r.latitude).maximum &&      // Latitude.max(p.latitude, r.latitude)

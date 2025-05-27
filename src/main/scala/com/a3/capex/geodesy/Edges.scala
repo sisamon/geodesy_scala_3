@@ -2,17 +2,10 @@ package com.a3.capex.geodesy
 
 import com.a3.capex.geodesy.Coordinates.{Longitude, Latitude}
 import com.a3.capex.geodesy.CoordinatesImplicits.{given_Conversion_Longitude_Angle, given_Conversion_Latitude_Angle}
-
 import com.a3.capex.geodesy.ShapesCore.{CurvedShapes, Box, Point}
 
-import squants._
-import squants.space.{Angle, Degrees, Kilometers, SquareMeters}
-//import squants.space.AngleConversions._
-import squants.space.LengthConversions.LengthNumeric
+import squants.space.Angle
 import java.lang.Math._
-import scala.annotation.tailrec
-import scala.math.sqrt
-import neotype._
 
 
 object Edges:
