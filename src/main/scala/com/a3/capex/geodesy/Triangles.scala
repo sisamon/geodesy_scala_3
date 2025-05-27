@@ -8,8 +8,6 @@ import squants.space.AngleConversions._
 import squants.space.LengthConversions._
 import java.lang.Math._
 import scala.annotation.tailrec
-import scalaz._
-import scalaz.Scalaz._
 import neotype._
 import scala.language.implicitConversions
 import squants.space.AreaConversions.AreaNumeric
@@ -141,13 +139,14 @@ object Triangles:
 
   object Triangle:
     /**
-     * Implicit Equal instance for Triangle that uses structural equality.
+     * Equality instance for Triangle that uses structural equality.
      * Two triangles are considered equal if they have the same three points,
      * regardless of the order of the points.
      */
-    implicit val equal: Equal[Triangle] = 
-      Equal.equal { (t1, t2) =>
-        val t1Points = Set(t1.p1, t1.p2, t1.p3)
-        val t2Points = Set(t2.p1, t2.p2, t2.p3)
-        t1Points == t2Points
-      }
+    given Equiv[Triangle] = Equiv.fromFunction { (t1, t2) =>
+      val t1Points = Set(t1.p1, t1.p2, t1.p3)
+      val t2Points = Set(t2.p1, t2.p2, t2.p3)
+      t1Points == t2Points
+    }
+    
+    given CanEqual[Triangle, Triangle] = CanEqual.derived

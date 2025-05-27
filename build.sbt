@@ -22,14 +22,14 @@ scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8", "-feature", "-unchec
 val neotypeVersion = "0.3.0"
 
 //idePackagePrefix := Some("org.a3.capex")
-resolvers += Resolver.sonatypeRepo("snapshots")
+resolvers += Resolver.sonatypeOssRepos("snapshots")
 libraryDependencies ++= Seq(
     //core
     "dev.soundness" % "quantitative-units" % "0.3.0",
     "org.typelevel" %% "squants" % "1.8.3",
     "io.github.kitlangton"  %%  "neotype"  % "0.3.0",
     "dev.zio"  %%  "zio-prelude"  % "1.0.0-RC27",
-    "org.scalaz"  %%  "scalaz-core"  % "7.3.8",
+    // Removed Scalaz dependency
     "org.typelevel"  %%  "spire"  % "0.18.0",
     "com.github.pureconfig" %% "pureconfig-core" % "0.17.7",
 )

@@ -12,26 +12,24 @@ import squants.space.LengthConversions.LengthNumeric
 import java.lang.Math._
 import scala.annotation.tailrec
 import scala.math.sqrt
-import scalaz._
-//import scalaz.Scalaz._
 import neotype._
 
 
 object Edges:
 
   case class Edge(origin: Point, end: Point) extends CurvedShapes:
-    override def barycenter = Point(Latitude.unsafeMake((origin.latitude + end.latitude) / 2), Longitude.unsafeMake((origin.longitude + end.longitude) / 2))
+    override def barycenter: Point = Point(Latitude.unsafeMake((origin.latitude + end.latitude) / 2), Longitude.unsafeMake((origin.longitude + end.longitude) / 2))
 
-    override def north = origin.latitude
+    override def north: Latitude = origin.latitude
 
-    override def south = end.latitude
+    override def south: Latitude = end.latitude
 
-    override def east = origin.longitude
+    override def east: Longitude = origin.longitude
 
-    override def west = end.longitude
+    override def west: Longitude = end.longitude
 
     // An edge can not contain anything.
-    override def contains(geom: Box) = false
+    override def contains(geom: Box): Boolean = false
 
     override def toString: String = s"($origin.latitude , $origin.longitude  -> $end.latitude , $end.longitude )"
 
@@ -56,11 +54,13 @@ object Edges:
       if (o2 == 0 && Point.onSegment(p1, q2, q1)) return true // p1, q1, and q2 are collinear and q2 lies on segment p1q1
       if (o3 == 0 && Point.onSegment(p2, p1, q2)) return true // p2, q2, and p1 are collinear and p1 lies on segment p2q2
       if (o4 == 0 && Point.onSegment(p2, q1, q2)) return true // p2, q2, and q1 are collinear and q1 lies on segment p2q2
-      return false // If none of the cases
+      false // If none of the cases
 
 
   object Edge:
-    implicit val equal: Equal[Edge] = Equal.equalA // [Edge]
-
+    // Equality instance for Edge using derived equality
+    given CanEqual[Edge, Edge] = CanEqual.derived
+    given Equiv[Edge] = Equiv.fromFunction(_ == _)
+    
     given Conversion[Edge, Box] = _.toBox
 

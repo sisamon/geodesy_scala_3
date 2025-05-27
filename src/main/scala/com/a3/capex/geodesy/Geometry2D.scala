@@ -5,8 +5,6 @@ import TypeclassInstances.given
 import squants.space.{Area, Length, Angle, Degrees, Kilometers, SquareMeters}
 import squants.space.AngleConversions._
 import java.lang.Math._
-import scalaz._
-import scalaz.Scalaz._
 import neotype._
 import scala.language.implicitConversions
 import com.a3.capex.geodesy.CoordinatesImplicits.given_Conversion_Long_LatitudeKey
@@ -263,7 +261,9 @@ object ShapesCore:
 
 
     object PointKey:
-      implicit val equal: Equal[PointKey] = Equal.equalA[PointKey]
+      // Equality instance for PointKey
+      given CanEqual[PointKey, PointKey] = CanEqual.derived
+      given Equiv[PointKey] = Equiv.fromFunction(_ == _)
 
 
   object PointImplicits:

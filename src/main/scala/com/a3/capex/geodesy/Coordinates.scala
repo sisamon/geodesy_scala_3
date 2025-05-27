@@ -7,8 +7,7 @@ package com.a3.capex.geodesy
  *  using this approach.
  */
 
-import scalaz.*
-import scalaz.Scalaz.*
+// Removed Scalaz imports
 import squants.*
 import squants.space.AngleConversions.*
 import squants.space.{Angle, Degrees, Kilometers, Length, SquareMeters}
@@ -333,7 +332,7 @@ object Coordinates:
       def toDegrees: Double = key.toDouble / 1e6
       
       /** String representation in degrees */
-      def toString: String = s"${toDegrees}°"
+      def toString: String = s"$toDegrees"
 
   /**
    * Opaque type representing a latitude value optimized for use as a map key.
@@ -358,7 +357,7 @@ object Coordinates:
       def toDegrees: Double = key.toDouble / 1e6
       
       /** String representation in degrees */
-      def toString: String = s"${toDegrees}°"
+      def toString: String = s"$toDegrees"
 
 
 object CoordinatesImplicits:
