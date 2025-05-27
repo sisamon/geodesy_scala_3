@@ -1,5 +1,5 @@
-[debug] Created transactional ClassFileManager with tempDir = /Volumes/LaCie/PROJECTS/Codigo CAPEX/piecemeal/project/target/scala-2.12/sbt-1.0/classes.bak
+[debug] Created transactional ClassFileManager with tempDir = /Volumes/Workspace/PROJECTS/bedtests/geodesy/geodesy_scala_3/project/target/scala-2.12/sbt-1.0/classes.bak
 [debug] About to delete class files:
 [debug] We backup class files:
-[debug] Created transactional ClassFileManager with tempDir = /Volumes/LaCie/PROJECTS/Codigo CAPEX/piecemeal/project/target/scala-2.12/sbt-1.0/classes.bak
-[debug] Removing the temporary directory used for backing up class files: /Volumes/LaCie/PROJECTS/Codigo CAPEX/piecemeal/project/target/scala-2.12/sbt-1.0/classes.bak
+[debug] Created transactional ClassFileManager with tempDir = /Volumes/Workspace/PROJECTS/bedtests/geodesy/geodesy_scala_3/project/target/scala-2.12/sbt-1.0/classes.bak
+[debug] Removing the temporary directory used for backing up class files: /Volumes/Workspace/PROJECTS/bedtests/geodesy/geodesy_scala_3/project/target/scala-2.12/sbt-1.0/classes.bak

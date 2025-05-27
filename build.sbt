@@ -14,14 +14,14 @@
 //  )
 
 version := "0.1.0-SNAPSHOT"
-scalaVersion := "3.3.0"
+scalaVersion := "3.3.6"
 name := "geodesic_scala"
 
 scalacOptions ++= Seq("-deprecation", "-encoding", "UTF-8", "-feature", "-unchecked", "-language:implicitConversions")
 
 val neotypeVersion = "0.3.0"
 
-idePackagePrefix := Some("org.a3.capex")
+//idePackagePrefix := Some("org.a3.capex")
 resolvers += Resolver.sonatypeRepo("snapshots")
 libraryDependencies ++= Seq(
     //core
