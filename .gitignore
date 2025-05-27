@@ -49,6 +49,7 @@ project/plugins/project/
 .ipynb_checkpoints
 
 # For VS Code Metals
+.bsp/
 .metals/
 .bloop/
 
