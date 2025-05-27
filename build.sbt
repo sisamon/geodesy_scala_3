@@ -32,4 +32,6 @@ libraryDependencies ++= Seq(
     // Removed Scalaz dependency
     "org.typelevel"  %%  "spire"  % "0.18.0",
     "com.github.pureconfig" %% "pureconfig-core" % "0.17.7",
+    "org.scalameta" %% "munit" % "1.0.0" % Test,
+    "org.tinfour" % "TinfourCore" % "2.1.8"
 )

@@ -15,10 +15,13 @@ import neotype.*
 
 import scala.annotation.targetName
 import scala.language.implicitConversions
+import scala.math._
 
 object Coordinates:
   val R: Length = Kilometers(6372.8) //radius in km
   val zero: Angle = Degrees(0.0)
+
+  def haversine(theta: Double): Double = sin(theta / 2) * sin(theta / 2)
 
   /**
    *  Let's take advantage of Scalas's type system to avoid swapping lat and lon

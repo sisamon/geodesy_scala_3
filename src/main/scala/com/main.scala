@@ -5,6 +5,10 @@ import com.a3.capex.geodesy.CoordinatesImplicits.{
   given_Conversion_Angle_Latitude, given_Conversion_Angle_Longitude,
   given_Conversion_Double_Angle, given_Conversion_Longitude_Angle
 }  // given_Conversion_Angle_Double,
+import org.tinfour.standard.IncrementalTin
+import org.tinfour.common.Vertex
+import scala.jdk.CollectionConverters._
+
 
 @main
 def main(): Unit = 
@@ -24,4 +28,49 @@ def main(): Unit =
   // val d: Double = a1
 
   println(l)
+  val tin = new IncrementalTin()
 
+  val vertices = Seq(
+    new Vertex(0, 0, 0),
+    new Vertex(1, 0, 0),
+    new Vertex(0, 1, 0),
+    new Vertex(1, 1, 0)
+  )
+
+  vertices.foreach(tin.add)
+  if (!tin.isBootstrapped)
+    throw new RuntimeException("TIN failed to initialize (not enough points?)")
+  println("Delaunay Triangles:")
+  val triangles = tin.triangles.asScala
+  triangles.foreach ( tri =>
+      val a = tri.getVertexA
+      val b = tri.getVertexB
+      val c = tri.getVertexC
+      val coords = Seq(a, b, c)
+        .map(v => f"(${v.getX}%.2f, ${v.getY}%.2f)")
+        .mkString(" - ")
+      println(s"Triangle: $coords")
+  )
+
+
+
+
+//
+//object TinfourExample extends App {
+//  val tin = new IncrementalTin()
+//
+//  val vertices = Seq(
+//    new Vertex(0, 0, 0),
+//    new Vertex(1, 0, 0),
+//    new Vertex(0, 1, 0),
+//    new Vertex(1, 1, 0)
+//  )
+//
+//  tin.add(vertices.asJavaCollection)
+//
+//  val triangles = tin.getTriangles.asScala
+//  triangles.foreach { tri =>
+//    val verts = tri.getVertices
+//    println("Triangle: " + verts.map(v => f"(${v.getX}%.2f, ${v.getY}%.2f)").mkString(" "))
+//  }
+//}

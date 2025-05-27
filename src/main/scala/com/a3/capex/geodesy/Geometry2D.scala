@@ -4,16 +4,18 @@ import Coordinates.{Latitude, Longitude, zero, R}
 import TypeclassInstances.given
 import squants.space.{Angle, Area, Length, SquareMeters}
 import squants.space.AngleConversions.*
-// Define type aliases for the opaque types
-type LatitudeKey = Long
-type LongitudeKey = Long
+
 
 import java.lang.Math.*
 import neotype.*
-
+import org.tinfour.common.Vertex
 import scala.language.implicitConversions
 import com.a3.capex.geodesy.CoordinatesImplicits.given_Conversion_Long_LatitudeKey
 import com.a3.capex.geodesy.CoordinatesImplicits.given_Conversion_Long_LongitudeKey
+
+// Define type aliases for the opaque types
+type LatitudeKey = Long
+type LongitudeKey = Long
 
 object ShapesCore:
   /**
@@ -274,7 +276,8 @@ object ShapesCore:
   object PointImplicits:
     given Conversion[Point, Point.PointKey] = _.keyCoordinates
     given Conversion[Point, Box] = _.toBox
-
+    given Conversion[Point, Vertex] = (p: Point) => new Vertex(p.longitude.unwrap.toDegrees, p.latitude.unwrap.toDegrees, 0.0)
+  
   //      implicit class PointKey2PointVal(val value: Point.PointKey) extends AnyVal:
   //      def toPoint: Point = Point(Degrees(value.latitude / angPrecission), Degrees(value.longitude / angPrecission))
   //      case class PointKey(latitude: LatitudeKey, longitude: LongitudeKey):

@@ -9,6 +9,7 @@ import scala.annotation.tailrec
 import neotype._
 import scala.language.implicitConversions
 import squants.space.AreaConversions.AreaNumeric
+import scala.math.Pi
 
 // Type aliases for better readability
 type Lat = Latitude
@@ -60,25 +61,70 @@ object Triangles:
     // Some basic geometry that I will need to revisit.
     override def area: Area =
       if p1 == p2 || p1 == p3 || p2 == p3 then
-        val lat1 = p1.latitude.unwrap.toDegrees
-        val lon1 = p1.longitude.unwrap.toDegrees
-        val lat2 = p2.latitude.unwrap.toDegrees
-        val lon2 = p2.longitude.unwrap.toDegrees
-        val lat3 = p3.latitude.unwrap.toDegrees
-        val lon3 = p3.longitude.unwrap.toDegrees
-        
-        // Using the shoelace formula for area calculation
-        val areaValue = R * R * abs(
-          lat1 * lon2 + 
-          lat2 * lon3 + 
-          lat3 * lon1 - 
-          lat1 * lon3 - 
-          lat2 * lon1 - 
-          lat3 * lon2
-        )
-        SquareMeters(areaValue)
-      else
         SquareMeters(0)
+      else
+        // Convert latitudes and longitudes to radians for calculations
+        val lat1_rad = p1.latitude.unwrap.toRadians
+        val lon1_rad = p1.longitude.unwrap.toRadians
+        val lat2_rad = p2.latitude.unwrap.toRadians
+        val lon2_rad = p2.longitude.unwrap.toRadians
+        val lat3_rad = p3.latitude.unwrap.toRadians
+        val lon3_rad = p3.longitude.unwrap.toRadians
+
+        // Helper function for Haversine
+        def haversine(theta: Double): Double = sin(theta / 2) * sin(theta / 2)
+
+        // Calculate side lengths (a, b, c) as angular distances (d/R) using Haversine formula
+        def angularDistance(ptA_lat: Double, ptA_lon: Double, ptB_lat: Double, ptB_lon: Double): Double = {
+          val dLat = ptB_lat - ptA_lat
+          val dLon = ptB_lon - ptA_lon
+          val hav_dLat = haversine(dLat)
+          val hav_dLon = haversine(dLon)
+          2 * asin(sqrt(hav_dLat + cos(ptA_lat) * cos(ptB_lat) * hav_dLon))
+        }
+
+        val ang_a = angularDistance(lat2_rad, lon2_rad, lat3_rad, lon3_rad) // side a: p2 to p3
+        val ang_b = angularDistance(lat1_rad, lon1_rad, lat3_rad, lon3_rad) // side b: p1 to p3
+        val ang_c = angularDistance(lat1_rad, lon1_rad, lat2_rad, lon2_rad) // side c: p1 to p2
+
+        // Calculate interior angles (alpha, beta, gamma) using spherical law of cosines
+        // Ensure arguments to acos are within [-1, 1] due to potential floating point inaccuracies
+        def calculateAngle(opposite_ang: Double, adj1_ang: Double, adj2_ang: Double): Double = {
+          val cos_val = (cos(opposite_ang) - cos(adj1_ang) * cos(adj2_ang)) / (sin(adj1_ang) * sin(adj2_ang))
+          acos(Math.max(-1.0, Math.min(1.0, cos_val))) // Clamp value to avoid NaN
+        }
+
+        val alpha = calculateAngle(ang_a, ang_b, ang_c) // Angle at p1
+        val beta = calculateAngle(ang_b, ang_a, ang_c) // Angle at p2
+        val gamma = calculateAngle(ang_c, ang_a, ang_b) // Angle at p3
+
+        // Spherical Excess (E)
+        val sphericalExcess = alpha + beta + gamma - PI // JPI is java.lang.Math.PI
+
+        // Area = E * R^2
+        // R is Coordinates.R which is Length (e.g., Kilometers(6372.8))
+        // R * R gives Area (e.g., SquareKilometers)
+        val areaOnSphere = (R * R) * sphericalExcess // Squants: Area * Double = Area
+        SquareMeters(areaOnSphere) // Convert to SquareMeters
+
+
+//        val lat1 = p1.latitude.unwrap.toDegrees
+//        val lon1 = p1.longitude.unwrap.toDegrees
+//        val lat2 = p2.latitude.unwrap.toDegrees
+//        val lon2 = p2.longitude.unwrap.toDegrees
+//        val lat3 = p3.latitude.unwrap.toDegrees
+//        val lon3 = p3.longitude.unwrap.toDegrees
+//        
+//        // Using the shoelace formula for area calculation
+//        val areaValue = R * R * abs(
+//          lat1 * lon2 + 
+//          lat2 * lon3 + 
+//          lat3 * lon1 - 
+//          lat1 * lon3 - 
+//          lat2 * lon1 - 
+//          lat3 * lon2
+//        )
+//        SquareMeters(areaValue)
 
     // Distance will be used to link to specific stations
     // We currently use the distance to the barycenter
