@@ -1,6 +1,3 @@
-package com.a3.capex
-
-
 import squants.space.{Angle, Degrees, Kilometers, SquareMeters}
 import squants.space.AngleConversions.*
 import com.a3.capex.geodesy.Coordinates.{Latitude, Longitude}
