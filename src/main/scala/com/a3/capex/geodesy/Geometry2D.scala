@@ -1,11 +1,13 @@
 package com.a3.capex.geodesy
 
-import Coordinates._
+import Coordinates.{Latitude, Longitude, *}
 import TypeclassInstances.given
-import squants.space.{Area, Length, Angle, Degrees, Kilometers, SquareMeters}
-import squants.space.AngleConversions._
-import java.lang.Math._
-import neotype._
+import squants.space.{Angle, Area, Degrees, Kilometers, Length, SquareMeters}
+import squants.space.AngleConversions.*
+
+import java.lang.Math.*
+import neotype.*
+
 import scala.language.implicitConversions
 import com.a3.capex.geodesy.CoordinatesImplicits.given_Conversion_Long_LatitudeKey
 import com.a3.capex.geodesy.CoordinatesImplicits.given_Conversion_Long_LongitudeKey
@@ -235,7 +237,7 @@ object ShapesCore:
 
   object Point:
 
-    val zeroPoint = Point(Latitude.unsafeMake(zero), Longitude.unsafeMake(zero))
+    val zeroPoint: Point = Point(Latitude.unsafeMake(zero), Longitude.unsafeMake(zero))
     val lon: Option[LongitudeKey] = None
     val lat: Option[LongitudeKey] = None
     // With this we should be able to use points as keys
@@ -283,12 +285,12 @@ object ShapesCore:
   //    (gridPrecission * longitude.toDegrees).toLong)
 
   case class Box(northEast: Point, southWest: Point) extends CurvedShapes:
-    //    override def toBox: Box = this
-    override def east = northEast.longitude
-    override def north = northEast.latitude
-    override def west = southWest.longitude
-    override def south = southWest.latitude
-    override def barycenter = (northEast + southWest)/2.0 // Point((north + south) / 2.0, ((east + west) / 2.0))
+    override def toBox: Box = this
+    override def east: Longitude = northEast.longitude
+    override def north: Latitude = northEast.latitude
+    override def west: Longitude = southWest.longitude
+    override def south: Latitude = southWest.latitude
+    override def barycenter: Point = (northEast + southWest)/2.0 // Point((north + south) / 2.0, ((east + west) / 2.0))
 
   // Is this actually needed anymore
   object Box:
