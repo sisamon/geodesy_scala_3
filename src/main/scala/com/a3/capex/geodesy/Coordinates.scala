@@ -10,7 +10,7 @@ package com.a3.capex.geodesy
 // Removed Scalaz imports
 import squants.*
 import squants.space.AngleConversions.*
-import squants.space.{Angle, Degrees, Kilometers, Length, SquareMeters}
+import squants.space.{Angle, Degrees, Kilometers, Length}
 import neotype.*
 
 import scala.annotation.targetName
@@ -361,8 +361,8 @@ object Coordinates:
 
 
 object CoordinatesImplicits:
-  import com.a3.capex.geodesy.Coordinates.{Latitude, Longitude, LongitudeKey, LatitudeKey, zero} // Longitude360,
-  import squants.space.{Angle, Degrees, Kilometers, SquareMeters, Length}
+  import com.a3.capex.geodesy.Coordinates.{Latitude, Longitude, LongitudeKey, LatitudeKey} // Longitude360,
+  import squants.space.Angle
   import squants.space.AngleConversions.AngleConversions
   import neotype._
 
