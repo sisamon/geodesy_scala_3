@@ -8,7 +8,6 @@ import squants.space.AngleConversions.*
 
 import java.lang.Math.*
 import neotype.*
-import org.tinfour.common.Vertex
 import scala.language.implicitConversions
 import com.a3.capex.geodesy.CoordinatesImplicits.given_Conversion_Long_LatitudeKey
 import com.a3.capex.geodesy.CoordinatesImplicits.given_Conversion_Long_LongitudeKey
@@ -35,6 +34,7 @@ object ShapesCore:
     def width: Angle = if ((east - west) < (west -east)) east - west else west - east
     def height: Angle = north - south
     def barycenter: Point
+    def isDegenerate: Boolean
 
     // Need to find a good reference for Spherical trigonometry
     def area: Area = SquareMeters(1) * (width.toDegrees * height.toDegrees)
@@ -161,6 +161,7 @@ object ShapesCore:
     override def height: Angle = zero
     override def area: Area = SquareMeters(0)
     override def toString: String = s"($latitude , $longitude)"  // "(" + + ")"
+    override def isDegenerate: Boolean = false
 
     def + (other: Point): Point =
       val lat: Angle = (this.latitude.unwrap + other.latitude.unwrap) % 360
@@ -276,8 +277,7 @@ object ShapesCore:
   object PointImplicits:
     given Conversion[Point, Point.PointKey] = _.keyCoordinates
     given Conversion[Point, Box] = _.toBox
-    given Conversion[Point, Vertex] = (p: Point) => new Vertex(p.longitude.unwrap.toDegrees, p.latitude.unwrap.toDegrees, 0.0)
-  
+
   //      implicit class PointKey2PointVal(val value: Point.PointKey) extends AnyVal:
   //      def toPoint: Point = Point(Degrees(value.latitude / angPrecission), Degrees(value.longitude / angPrecission))
   //      case class PointKey(latitude: LatitudeKey, longitude: LongitudeKey):
@@ -297,6 +297,7 @@ object ShapesCore:
     override def west: Longitude = southWest.longitude
     override def south: Latitude = southWest.latitude
     override def barycenter: Point = (northEast + southWest)/2.0 // Point((north + south) / 2.0, ((east + west) / 2.0))
+    override def isDegenerate: Boolean = northEast == southWest
 
   // Is this actually needed anymore
   object Box:

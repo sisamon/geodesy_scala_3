@@ -26,6 +26,8 @@ object Edges:
 
     override def toString: String = s"($origin.latitude , $origin.longitude  -> $end.latitude , $end.longitude )"
 
+    override def isDegenerate: Boolean = origin == end
+    
     // Sorted by latitude, used to ensure membership of edges
     def sorted(): Edge =
       if (origin.isSorted(end)) Edge(origin, end) else Edge(end, origin)

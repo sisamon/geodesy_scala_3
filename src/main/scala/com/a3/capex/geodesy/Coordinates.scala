@@ -362,7 +362,6 @@ object Coordinates:
       /** String representation in degrees */
       def toString: String = s"$toDegrees"
 
-
 object CoordinatesImplicits:
   import com.a3.capex.geodesy.Coordinates.{Latitude, Longitude, LongitudeKey, LatitudeKey} // Longitude360,
   import squants.space.Angle

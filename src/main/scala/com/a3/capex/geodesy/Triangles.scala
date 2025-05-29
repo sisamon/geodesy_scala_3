@@ -144,44 +144,60 @@ object Triangles:
 
     def isDegenerate: Boolean = p1 == p2 || p1 == p3 || p2 == p3
 
-    def partition(level: Int, puntosTriangulacion: Array[Point.PointKey]): List[Triangle] =
-      def midTriangles(t: Triangle): List[Triangle] =
-        List(
-          Triangle(t.p1, t.p1.middle(t.p2), t.p1.middle(t.p3)),
-          Triangle(t.p2, t.p2.middle(t.p1), t.p2.middle(t.p3)),
-          Triangle(t.p3, t.p3.middle(t.p2), t.p3.middle(t.p1)),
-          Triangle(t.p1.middle(t.p2), t.p2.middle(t.p3), t.p3.middle(t.p1))
-        )
+    /**
+     * Creates child triangles from a triangle 
+     */ 
+    def midTriangles: List[Triangle] =
+      List(
+        Triangle(p1, p1.middle(p2), p1.middle(p3)),
+        Triangle(p2, p2.middle(p1), p2.middle(p3)),
+        Triangle(p3, p3.middle(p2), p3.middle(p1)),
+        Triangle(p1.middle(p2), p2.middle(p3), p3.middle(p1))
+      )
 
-      def maxsize(t: Triangle): Boolean =
-        val containsPoint = puntosTriangulacion.contains(t.p1.keyCoordinates) ||
-                          puntosTriangulacion.contains(t.p2.keyCoordinates) ||
-                          puntosTriangulacion.contains(t.p3.keyCoordinates)
-        
-        // Calculate distances between all points
-        val d1 = t.p1.distance(t.p2).toKilometers
-        val d2 = t.p1.distance(t.p3).toKilometers
-        val d3 = t.p2.distance(t.p3).toKilometers
-        
-        // Find the maximum distance
-        val maxDistance = d1.max(d2).max(d3)
-        
-        containsPoint && (maxDistance > 10.0)
-
+//    This partition is legacy, probably i will not need it anymore. 
+//    def partition(level: Int, puntosTriangulacion: Array[Point.PointKey]): List[Triangle] =
+    
+//    def maxsize: Boolean =
+//      val containsPoint = puntosTriangulacion.contains(t.p1.keyCoordinates) ||
+//        puntosTriangulacion.contains(t.p2.keyCoordinates) ||
+//        puntosTriangulacion.contains(t.p3.keyCoordinates)
+//
+//      // Calculate distances between all points
+//      val d1 = t.p1.distance(t.p2).toKilometers
+//      val d2 = t.p1.distance(t.p3).toKilometers
+//      val d3 = t.p2.distance(t.p3).toKilometers
+//
+//      // Find the maximum distance
+//      val maxDistance = d1.max(d2).max(d3)
+//
+//      containsPoint && (maxDistance > 10.0)
+    
+    /**
+     * Creates child triangles from a parent triangle 
+     */
+    def partition(level: Int): List[Triangle] =
       @tailrec
-      def generateChildren(level: Int, triangles: List[Triangle], children: List[Triangle]): List[Triangle] =
-        (level, triangles) match
-          case (_, Nil) => children
-          case (1, xs) => xs ::: children
-          case (n, xs) =>
-            val newTriangles = xs.flatMap(t => if maxsize(t) then midTriangles(t) else List(t))
-            generateChildren(n - 1, newTriangles, children)
+      def generateNthGeneration(remainingLevels: Int, currentGenerationTriangles: List[Triangle]): List[Triangle] = {
+        if (remainingLevels <= 0 || currentGenerationTriangles.isEmpty) {
+          currentGenerationTriangles
+        } else {
+          val nextGeneration = currentGenerationTriangles.flatMap(_.midTriangles)
+          generateNthGeneration(remainingLevels - 1, nextGeneration)
+        }
+      }
 
-      if level >= 1 then generateChildren(level, midTriangles(this), Nil)
-      else Nil
+      if (level < 0) Nil // Or consider throwing an IllegalArgumentException for negative levels
+      else if (level == 0) List(this)
+      else generateNthGeneration(level, List(this))
 
 
   object Triangle:
+    /**
+     * Creates a degenerate triangle where all three vertices are the same point.
+     */
+    def apply(p: Point): Triangle = Triangle(p, p, p)
+
     /**
      * Equality instance for Triangle that uses structural equality.
      * Two triangles are considered equal if they have the same three points,

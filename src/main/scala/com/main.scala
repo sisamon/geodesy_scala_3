@@ -13,7 +13,7 @@ import scala.jdk.CollectionConverters._
 @main
 def main(): Unit = 
 
-  println("Hello world!")
+  println("I am not crazy. Hello world!")
   val d1: Double = 45.0
   val d2: Double = 18.5
   val a1: Angle = d1
