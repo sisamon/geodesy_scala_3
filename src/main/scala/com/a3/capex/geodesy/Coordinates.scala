@@ -335,7 +335,7 @@ object Coordinates:
       def toDegrees: Double = key.toDouble / 1e6
       
       /** String representation in degrees */
-      def toString: String = s"$toDegrees"
+      def asString: String = (key.toDouble / 1e6).toString
 
   /**
    * Opaque type representing a latitude value optimized for use as a map key.
@@ -360,7 +360,7 @@ object Coordinates:
       def toDegrees: Double = key.toDouble / 1e6
       
       /** String representation in degrees */
-      def toString: String = s"$toDegrees"
+      def asString: String = (key.toDouble / 1e6).toString
 
 object CoordinatesImplicits:
   import com.a3.capex.geodesy.Coordinates.{Latitude, Longitude, LongitudeKey, LatitudeKey} // Longitude360,

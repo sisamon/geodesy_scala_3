@@ -1,9 +1,9 @@
-import squants.space.{Angle, Degrees, Kilometers, SquareMeters}
+import squants.space.Angle
 import squants.space.AngleConversions.*
-import com.a3.capex.geodesy.Coordinates.{Latitude, Longitude}
+import com.a3.capex.geodesy.Coordinates.Longitude
 import com.a3.capex.geodesy.CoordinatesImplicits.{
-  given_Conversion_Angle_Latitude, given_Conversion_Angle_Longitude,
-  given_Conversion_Double_Angle, given_Conversion_Longitude_Angle
+  given_Conversion_Angle_Longitude,
+  given_Conversion_Double_Angle
 }  // given_Conversion_Angle_Double,
 import org.tinfour.standard.IncrementalTin
 import org.tinfour.common.Vertex
@@ -17,7 +17,6 @@ def main(): Unit =
   val d1: Double = 45.0
   val d2: Double = 18.5
   val a1: Angle = d1
-  val a2: Angle = d2
   val l1: Longitude = a1 // Longitude.unsafeMake(d1.degrees)
   val l2: Longitude = Longitude.unsafeMake(d2.degrees)
 

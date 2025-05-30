@@ -6,10 +6,11 @@ import TypeclassInstances.given
 import squants.space.{Angle, Length, Area, SquareMeters}
 import java.lang.Math._
 import scala.annotation.tailrec
-import neotype._
+import neotype.unwrap
+import squants.space.AngleConversions._
 import scala.language.implicitConversions
 import squants.space.AreaConversions.AreaNumeric
-import scala.math.Pi
+//import scala.math.Pi
 
 // Type aliases for better readability
 type Lat = Latitude
@@ -34,11 +35,24 @@ object Triangles:
      * the spherical nature of the Earth. For more accurate results, consider
      * converting to 3D coordinates and calculating the centroid there.
      */
-    override def barycenter: Point = 
-      // Calculate average latitude and longitude
-      val avgLat = p1.latitude.average(p2.latitude).average(p3.latitude)
-      val avgLon = p1.longitude.average(p2.longitude).average(p3.longitude)
-      Point(avgLat, avgLon)
+    override def barycenter: Point = {
+      val avgLatVal = (p1.latitude.unwrap.toDegrees + p2.latitude.unwrap.toDegrees + p3.latitude.unwrap.toDegrees) / 3.0
+      val avgLonValDegrees = (p1.longitude.unwrap.toDegrees + p2.longitude.unwrap.toDegrees + p3.longitude.unwrap.toDegrees) / 3.0
+      // Normalize the average longitude to be within [-180, 180) degrees
+      val normalizedAvgLonDegrees = ((avgLonValDegrees + 540) % 360) - 180
+      // Adjust if the result of % is negative for negative inputs, ensuring it's truly in [-180, 180)
+      // Example: -190 -> ((-190 + 540) % 360) - 180 = (350 % 360) - 180 = 350 - 180 = 170. Correct.
+      // Example: -550 -> ((-550 + 540) % 360) - 180 = (-10 % 360) - 180. In Scala, % can be negative.
+      // (-10 % 360) is -10. So, -10 - 180 = -190. Incorrect.
+      // A more robust normalization for [-180, 180) from any angle 'a': val norm = (a % 360 + 360) % 360; if (norm > 180) norm - 360 else norm
+      val finalNormalizedLonDegrees = {
+        var tempLon = avgLonValDegrees % 360
+        if (tempLon <= -180) tempLon += 360
+        else if (tempLon > 180) tempLon -= 360
+        tempLon
+      }
+      Point(Latitude.unsafeMake(avgLatVal.degrees), Longitude.unsafeMake(finalNormalizedLonDegrees.degrees))
+    }
 
     /** Returns the easternmost longitude of the triangle */
     override def east: Lon =
@@ -86,6 +100,14 @@ object Triangles:
         val ang_a = angularDistance(lat2_rad, lon2_rad, lat3_rad, lon3_rad) // side a: p2 to p3
         val ang_b = angularDistance(lat1_rad, lon1_rad, lat3_rad, lon3_rad) // side b: p1 to p3
         val ang_c = angularDistance(lat1_rad, lon1_rad, lat2_rad, lon2_rad) // side c: p1 to p2
+
+        // Check for collinearity: if one side is approx sum of other two (in radians)
+        // This handles cases where points are distinct but lie on the same great circle arc.
+        val sides = List(ang_a, ang_b, ang_c).sorted
+        val epsilonAngleRadians = 1E-8 // A small tolerance for floating point comparisons of angles in radians
+        if (abs(sides(2) - (sides(0) + sides(1))) < epsilonAngleRadians) {
+          return SquareMeters(0) // Collinear or nearly collinear
+        }
 
         // Calculate interior angles (alpha, beta, gamma) using spherical law of cosines
         // Ensure arguments to acos are within [-1, 1] due to potential floating point inaccuracies
@@ -135,12 +157,8 @@ object Triangles:
 //      dist * dist
 
     def sorted: Triangle =
-      if p1.isSorted(p2) && p1.isSorted(p3) && p2.isSorted(p3) then Triangle(p1, p2, p3)
-      else if p1.isSorted(p2) && p1.isSorted(p3) && p3.isSorted(p2) then Triangle(p1, p3, p2)
-      else if p2.isSorted(p1) && p2.isSorted(p3) && p1.isSorted(p3) then Triangle(p2, p1, p3)
-      else if p2.isSorted(p1) && p2.isSorted(p3) && p3.isSorted(p1) then Triangle(p2, p3, p1)
-      else if p3.isSorted(p1) && p3.isSorted(p2) && p1.isSorted(p2) then Triangle(p3, p2, p1)
-      else Triangle(p3, p1, p2) // (p3.isSorted(p1) && p3.isSorted(p2) && p2.isSorted(p1))
+      val points = List(p1, p2, p3).sorted // Relies on implicit Ordering[Point] from TypeclassInstances
+      Triangle(points(0), points(1), points(2))
 
     def isDegenerate: Boolean = p1 == p2 || p1 == p3 || p2 == p3
 

@@ -31,7 +31,13 @@ object ShapesCore:
     def south: Latitude
     def east: Longitude
     def west: Longitude
-    def width: Angle = if ((east - west) < (west -east)) east - west else west - east
+    def width: Angle = {
+      val eDeg = east.unwrap.toDegrees
+      val wDeg = west.unwrap.toDegrees
+      val directSpan = Math.abs(eDeg - wDeg)
+      val widthInDegrees = Math.min(directSpan, 360.0 - directSpan)
+      widthInDegrees.degrees
+    }
     def height: Angle = north - south
     def barycenter: Point
     def isDegenerate: Boolean
@@ -89,14 +95,91 @@ object ShapesCore:
      */
     def northEastCorner: (Latitude, Longitude) = (north, east)
 
+    // HELPER METHODS for contains, using "smaller span" logic
+    private def getEffectiveLongitudeSpan(boxEast: Longitude, boxWest: Longitude): (Double, Double, Boolean) = {
+      val e = boxEast.unwrap.toDegrees
+      val w = boxWest.unwrap.toDegrees
+
+      if (e == w) { // Point or meridian line
+        (w, e, false)
+      } else {
+        // spanWestToEastClockwise is the angular distance from W to E moving eastward
+        val spanWestToEastClockwise = (e - w + 360.0) % 360.0
+        
+        if (spanWestToEastClockwise <= 180.0) {
+          // This is the shorter span (or one of two equal 180deg spans).
+          // It goes from W to E (clockwise).
+          // It crosses the Antimeridian if E is numerically smaller than W (e.g. W=350, E=10).
+          (w, e, e < w)
+        } else {
+          // The other span (E to W, clockwise) is shorter.
+          // Effective W is E, effective E is W.
+          // It crosses the Antimeridian if W is numerically smaller than E (e.g. W=10, E=350 implies effective W=350, E=10).
+          (e, w, w < e)
+        }
+      }
+    }
+
+    private def isLongitudeInsideEffectiveSpan(lon: Longitude, effWest: Double, effEast: Double, effCrossesAM: Boolean): Boolean = {
+      val lonDeg = lon.unwrap.toDegrees
+      if (effCrossesAM) {
+        // For an AM-crossing span, longitude is inside if it's on either side of AM, within the span parts.
+        lonDeg >= effWest || lonDeg <= effEast
+      } else {
+        // For a standard span, simple range check.
+        // Handles the case where effWest == effEast (meridian line) correctly.
+        lonDeg >= effWest && lonDeg <= effEast
+      }
+    }
+
     /**
      * Returns whether this geometry contains the other.
      *
      * Containment includes the border, so points "on the edge" count as
      * contained.
+     * This logic now considers the "smaller span" interpretation for longitude ranges.
      */
-    def contains(geom: Box ): Boolean =
-      east <= geom.east && geom.west <= west && south <= geom.south && geom.north <= north
+    def contains(geom: Box ): Boolean = {
+      // Get effective longitude spans based on "smaller span" rule
+      val (thisEffW, thisEffE, thisCrossesAM) = getEffectiveLongitudeSpan(this.east, this.west)
+      val (geomEffW, geomEffE, geomCrossesAM) = getEffectiveLongitudeSpan(geom.east, geom.west)
+
+//      // Debugging output
+//      println(s"[Box.contains] === Checking if THIS box: ${this} contains OTHER box: ${geom} ===")
+//      println(s"[Box.contains] THIS (raw): N=${this.north.unwrap.toDegrees}, S=${this.south.unwrap.toDegrees}, E=${this.east.unwrap.toDegrees}, W=${this.west.unwrap.toDegrees}")
+//      println(s"[Box.contains] THIS (eff): effW=${thisEffW}, effE=${thisEffE}, crossesAM=${thisCrossesAM}, Width=${this.width.toDegrees}")
+//      println(s"[Box.contains] OTHER (raw): N=${geom.north.unwrap.toDegrees}, S=${geom.south.unwrap.toDegrees}, E=${geom.east.unwrap.toDegrees}, W=${geom.west.unwrap.toDegrees}")
+//      println(s"[Box.contains] OTHER (eff): effW=${geomEffW}, effE=${geomEffE}, crossesAM=${geomCrossesAM}, Width=${geom.width.toDegrees}")
+//
+      val latContains = (this.north >= geom.north) && (this.south <= geom.south)
+//      println(s"[Box.contains] Latitudinal containment: ${latContains}")
+
+      // Longitudinal checks using effective spans for 'this' and raw points for 'geom'
+      val geomWestInsideThis = isLongitudeInsideEffectiveSpan(geom.west, thisEffW, thisEffE, thisCrossesAM)
+//      println(s"  [lonCheck] geom.west_raw (${geom.west.unwrap.toDegrees}) inside THIS_eff (W:$thisEffW, E:$thisEffE, AM:$thisCrossesAM): $geomWestInsideThis")
+      
+      val geomEastInsideThis = isLongitudeInsideEffectiveSpan(geom.east, thisEffW, thisEffE, thisCrossesAM)
+//      println(s"  [lonCheck] geom.east_raw (${geom.east.unwrap.toDegrees}) inside THIS_eff (W:$thisEffW, E:$thisEffE, AM:$thisCrossesAM): $geomEastInsideThis")
+      
+      // If 'this' effective span is standard but 'geom's effective span crosses AM, 'geom' cannot be contained.
+      val longitudinalSpanContained = if (!thisCrossesAM && geomCrossesAM)
+//        println(s"  [lonCheck] Longitudinal span: FALSE (standard 'this_eff' cannot contain AM-crossing 'geom_eff')")
+        false
+      else
+        // Check if the defining west and east points of the geom Box fall within this Box's effective span.
+        val result = geomWestInsideThis && geomEastInsideThis
+//        println(s"  [lonCheck] Longitudinal span (geom.west_raw & geom.east_raw in THIS_eff): $result")
+        result
+
+      // Width condition using a small tolerance for floating point comparison
+      val widthCondition = (this.width.toDegrees >= geom.width.toDegrees - 1e-9)
+//      println(s"[Box.contains] Width condition (this.width (${this.width.toDegrees}) >= geom.width (${geom.width.toDegrees})): ${widthCondition}")
+
+      val finalResult = latContains && longitudinalSpanContained && widthCondition
+//      println(s"[Box.contains] Final result: ${finalResult} (lat:${latContains} && lonSpan:${longitudinalSpanContained} && width:${widthCondition})")
+//      println(s"[Box.contains] =======================================================================")
+      finalResult
+    }
     //Box | Point
     //      val geom
     //      match
@@ -125,8 +208,11 @@ object ShapesCore:
      * is guaranteed to contain both geometries.
      */
     def expand(geom: Box): Box =
-      Box(Point(south.min(geom.south), east.min(geom.east).denormalize() ) ,
-        Point(north.max(geom.north), west.max(geom.west).denormalize() ) )
+      val newNorth = this.north.max(geom.north)
+      val newSouth = this.south.min(geom.south)
+      val newEast  = this.east.max(geom.east)   // Longitude.max handles antimeridian logic
+      val newWest  = this.west.min(geom.west)   // Longitude.min handles antimeridian logic
+      Box(Point(newNorth, newEast), Point(newSouth, newWest))
 
     /**
      * Returns whether this geometry intersects with the other.
@@ -252,10 +338,11 @@ object ShapesCore:
     case class PointKey(latitude: Coordinates.LatitudeKey, longitude: Coordinates.LongitudeKey)
 
     def onSegment(p: Point, q: Point, r: Point): Boolean =
-      q.latitude <= p.latitude.max(r.latitude) && // ~List(p.latitude, r.latitude).maximum &&      // Latitude.max(p.latitude, r.latitude)
-        q.latitude >= p.latitude.min(r.latitude) // ~List(p.latitude, r.latitude).minimum &&    // Latitude.min(p.latitude, r.latitude) &&
-      q.longitude <= p.longitude.max(r.longitude) && // ~List(p.longitude, r.longitude).maximum && // Longitude.max(p.longitude, r.longitude) &&
-        q.longitude >= p.longitude.min(r.longitude) //p.latitude.min(r.latitude) //~List(p.longitude, r.longitude).minimum    // Longitude.min(p.longitude, r.longitude)
+      orientation(p, q, r) == 0 && // Check for collinearity first
+        q.latitude <= p.latitude.max(r.latitude) &&
+        q.latitude >= p.latitude.min(r.latitude) &&
+        q.longitude <= p.longitude.max(r.longitude) &&
+        q.longitude >= p.longitude.min(r.longitude)
 
     def orientation(p: Point, q: Point, r: Point): Int =
       val value = (q.longitude.unwrap.toDegrees - p.longitude.unwrap.toDegrees) *
@@ -293,9 +380,9 @@ object ShapesCore:
   case class Box(northEast: Point, southWest: Point) extends CurvedShapes:
     override def toBox: Box = this
     override def east: Longitude = northEast.longitude
-    override def north: Latitude = northEast.latitude
+    override def north: Latitude = northEast.latitude.max(southWest.latitude)
     override def west: Longitude = southWest.longitude
-    override def south: Latitude = southWest.latitude
+    override def south: Latitude = northEast.latitude.min(southWest.latitude)
     override def barycenter: Point = (northEast + southWest)/2.0 // Point((north + south) / 2.0, ((east + west) / 2.0))
     override def isDegenerate: Boolean = northEast == southWest
 

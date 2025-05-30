@@ -1,12 +1,8 @@
 package com.a3.capex.geodesy
 
 import com.a3.capex.geodesy.Coordinates.{Longitude, Latitude}
-import com.a3.capex.geodesy.CoordinatesImplicits.{given_Conversion_Longitude_Angle, given_Conversion_Latitude_Angle}
 import com.a3.capex.geodesy.ShapesCore.{CurvedShapes, Box, Point}
-
-import squants.space.Angle
-import java.lang.Math._
-
+import com.a3.capex.geodesy.CoordinatesImplicits.{given_Conversion_Longitude_Angle, given_Conversion_Latitude_Angle}
 
 object Edges:
 

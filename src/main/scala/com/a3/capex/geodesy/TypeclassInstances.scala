@@ -33,9 +33,12 @@ object TypeclassInstances:
       if a == b then 0
       else 
         // Calculate the angular difference between longitudes (normalized to [-180°, 180°])
-        val diff = (b.unwrap.toDegrees - a.unwrap.toDegrees + 540) % 360 - 180
-        if (diff > 0 && diff <= 180) -1  // b is more easterly than a
-        else 1  // a is more easterly than b
+        val aDeg = a.unwrap.toDegrees // Added for clarity, though unwrap was already used
+        val bDeg = b.unwrap.toDegrees // Added for clarity
+        val diff = (bDeg - aDeg + 540) % 360 - 180
+        if (diff == 0.0) 0      // Equivalent (e.g., 180 vs -180)
+        else if (diff > 0) -1   // b is to the East of a (shorter path), so a < b
+        else 1                  // b is to the West of a (shorter path, diff < 0), so a > b
 
   /**
    * Ordering for Latitude, with north being greater than south.
@@ -43,6 +46,16 @@ object TypeclassInstances:
   given Ordering[Latitude] with
     def compare(a: Latitude, b: Latitude): Int =
       a.unwrap.toDegrees.compare(b.unwrap.toDegrees)
+
+  /**
+   * Ordering for Point, primarily by latitude (south to north),
+   * secondarily by longitude (west to east, respecting antimeridian).
+   */
+  given Ordering[ShapesCore.Point] with
+    def compare(a: ShapesCore.Point, b: ShapesCore.Point): Int =
+      val latCompare = summon[Ordering[Latitude]].compare(a.latitude, b.latitude)
+      if (latCompare != 0) latCompare
+      else summon[Ordering[Longitude]].compare(a.longitude, b.longitude)
 
   /**
    * Type for combining elements through addition.
