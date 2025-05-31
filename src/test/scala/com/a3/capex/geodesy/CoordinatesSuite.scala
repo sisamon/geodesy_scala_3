@@ -1,9 +1,9 @@
 package com.a3.capex.geodesy
 
 import munit.FunSuite
-import com.a3.capex.geodesy.Coordinates._ // Import types and methods
-import squants.space.{Angle, Degrees} // Import Squants types
-import neotype.unwrap // Import unwrap extension method for Neotype
+import com.a3.capex.geodesy.Coordinates.* // Import types and methods
+import squants.space.{Angle, Degrees}     // Import Squants types
+import neotype.unwrap                     // Import unwrap extension method for Neotype
 
 class CoordinatesSuite extends munit.FunSuite {
 
@@ -45,15 +45,21 @@ class CoordinatesSuite extends munit.FunSuite {
     assertEquals(Longitude.validate(Degrees(180.0)), true)
     assertEquals(Longitude.validate(Degrees(-180.0)), true)
     // Assuming 0-360 is also a valid input range for the underlying Angle before normalization by Newtype
-    assertEquals(Longitude.validate(Degrees(360.0)), true) 
+    assertEquals(Longitude.validate(Degrees(360.0)), true)
     assertEquals(Longitude.validate(Degrees(90.0)), true)
   }
 
   test("Longitude.validate should reject invalid longitudes") {
-    assertEquals(Longitude.validate(Degrees(360.1)), "Longitude must be between -180.0 and +180.0 or between 0.0 and +360.0")
-    assertEquals(Longitude.validate(Degrees(-180.1)), "Longitude must be between -180.0 and +180.0 or between 0.0 and +360.0")
+    assertEquals(
+      Longitude.validate(Degrees(360.1)),
+      "Longitude must be between -180.0 and +180.0 or between 0.0 and +360.0"
+    )
+    assertEquals(
+      Longitude.validate(Degrees(-180.1)),
+      "Longitude must be between -180.0 and +180.0 or between 0.0 and +360.0"
+    )
   }
-  
+
   test("Longitude.make should create valid longitudes from runtime values") {
     val lonEither = Longitude.make(Degrees(120.0))
     assert(lonEither.isRight, "Longitude.make should succeed for valid input")
@@ -63,9 +69,12 @@ class CoordinatesSuite extends munit.FunSuite {
   test("Longitude.make should fail for invalid runtime longitudes with correct message") {
     val lonEither = Longitude.make(Degrees(-190.0))
     assert(lonEither.isLeft, "Longitude.make should fail for invalid input")
-    assertEquals(lonEither.left.getOrElse(fail("Expected Left")), "Longitude must be between -180.0 and +180.0 or between 0.0 and +360.0")
+    assertEquals(
+      lonEither.left.getOrElse(fail("Expected Left")),
+      "Longitude must be between -180.0 and +180.0 or between 0.0 and +360.0"
+    )
   }
-  
+
   test("Longitude.unsafeMake should create longitudes even if invalid according to validate") {
     val lon = Longitude.unsafeMake(Degrees(-190.0)) // Should not throw
     assertEquals(lon.unwrap, Degrees(-190.0))
@@ -87,17 +96,32 @@ class CoordinatesSuite extends munit.FunSuite {
   // Validation and .make are tested separately.
 
   test("Latitude.average should correctly average two latitudes") {
-    assertEquals(Latitude.unsafeMake(Degrees(10.0)).average(Latitude.unsafeMake(Degrees(30.0))), Latitude.unsafeMake(Degrees(20.0)))
-    assertEquals(Latitude.unsafeMake(Degrees(-10.0)).average(Latitude.unsafeMake(Degrees(-30.0))), Latitude.unsafeMake(Degrees(-20.0)))
-    assertEquals(Latitude.unsafeMake(Degrees(10.0)).average(Latitude.unsafeMake(Degrees(-30.0))), Latitude.unsafeMake(Degrees(-10.0)))
-    assertEquals(Latitude.unsafeMake(Degrees(20.0)).average(Latitude.unsafeMake(Degrees(0.0))), Latitude.unsafeMake(Degrees(10.0)))
-    assertEquals(Latitude.unsafeMake(Degrees(45.0)).average(Latitude.unsafeMake(Degrees(45.0))), Latitude.unsafeMake(Degrees(45.0)))
+    assertEquals(
+      Latitude.unsafeMake(Degrees(10.0)).average(Latitude.unsafeMake(Degrees(30.0))),
+      Latitude.unsafeMake(Degrees(20.0))
+    )
+    assertEquals(
+      Latitude.unsafeMake(Degrees(-10.0)).average(Latitude.unsafeMake(Degrees(-30.0))),
+      Latitude.unsafeMake(Degrees(-20.0))
+    )
+    assertEquals(
+      Latitude.unsafeMake(Degrees(10.0)).average(Latitude.unsafeMake(Degrees(-30.0))),
+      Latitude.unsafeMake(Degrees(-10.0))
+    )
+    assertEquals(
+      Latitude.unsafeMake(Degrees(20.0)).average(Latitude.unsafeMake(Degrees(0.0))),
+      Latitude.unsafeMake(Degrees(10.0))
+    )
+    assertEquals(
+      Latitude.unsafeMake(Degrees(45.0)).average(Latitude.unsafeMake(Degrees(45.0))),
+      Latitude.unsafeMake(Degrees(45.0))
+    )
   }
 
   test("Latitude + Angle should add and normalize correctly") {
-    val lat80 = Latitude.unsafeMake(Degrees(80.0))
+    val lat80        = Latitude.unsafeMake(Degrees(80.0))
     val lat_minus_80 = Latitude.unsafeMake(Degrees(-80.0))
-    val lat0 = Latitude.unsafeMake(Degrees(0.0))
+    val lat0         = Latitude.unsafeMake(Degrees(0.0))
 
     assertEquals(lat80 + Degrees(5.0), Latitude.unsafeMake(Degrees(85.0)), "Stays within bounds")
     // 80 + 15 = 95. Normalized: 180 - 95 = 85
@@ -110,12 +134,12 @@ class CoordinatesSuite extends munit.FunSuite {
     assertEquals(lat0 + Degrees(-100.0), Latitude.unsafeMake(Degrees(-80.0)), "From zero over South Pole")
     // 80 + 290 = 370. cycles = floor((370+90)/360) = 1. reduced = 370 - 360 = 10. Normalized: 10
     assertEquals(lat80 + Degrees(290.0), Latitude.unsafeMake(Degrees(10.0)), "Large angle wrapping")
-     // 80 + 280 = 360. cycles = floor((360+90)/360) = 1. reduced = 360 - 360 = 0. Normalized: 0
+    // 80 + 280 = 360. cycles = floor((360+90)/360) = 1. reduced = 360 - 360 = 0. Normalized: 0
     assertEquals(lat80 + Degrees(280.0), Latitude.unsafeMake(Degrees(0.0)), "Large angle wrapping to 0")
   }
 
   test("Latitude - Angle should subtract and normalize correctly") {
-    val lat80 = Latitude.unsafeMake(Degrees(80.0))
+    val lat80        = Latitude.unsafeMake(Degrees(80.0))
     val lat_minus_80 = Latitude.unsafeMake(Degrees(-80.0))
 
     assertEquals(lat80 - Degrees(5.0), Latitude.unsafeMake(Degrees(75.0)), "Stays within bounds")
@@ -126,8 +150,8 @@ class CoordinatesSuite extends munit.FunSuite {
   }
 
   test("Latitude.compare should correctly compare two latitudes") {
-    val lat10 = Latitude.unsafeMake(Degrees(10.0))
-    val lat20 = Latitude.unsafeMake(Degrees(20.0))
+    val lat10        = Latitude.unsafeMake(Degrees(10.0))
+    val lat20        = Latitude.unsafeMake(Degrees(20.0))
     val lat_minus_10 = Latitude.unsafeMake(Degrees(-10.0))
     val lat_minus_20 = Latitude.unsafeMake(Degrees(-20.0))
 
@@ -145,30 +169,60 @@ class CoordinatesSuite extends munit.FunSuite {
   // Validation and .make are tested separately.
 
   test("Longitude.average should correctly average two longitudes, handling antimeridian") {
-    assertEquals(Longitude.unsafeMake(Degrees(10.0)).average(Longitude.unsafeMake(Degrees(30.0))), Longitude.unsafeMake(Degrees(20.0)))
-    assertEquals(Longitude.unsafeMake(Degrees(-10.0)).average(Longitude.unsafeMake(Degrees(-30.0))), Longitude.unsafeMake(Degrees(-20.0)))
-    assertEquals(Longitude.unsafeMake(Degrees(-10.0)).average(Longitude.unsafeMake(Degrees(10.0))), Longitude.unsafeMake(Degrees(0.0)))
+    assertEquals(
+      Longitude.unsafeMake(Degrees(10.0)).average(Longitude.unsafeMake(Degrees(30.0))),
+      Longitude.unsafeMake(Degrees(20.0))
+    )
+    assertEquals(
+      Longitude.unsafeMake(Degrees(-10.0)).average(Longitude.unsafeMake(Degrees(-30.0))),
+      Longitude.unsafeMake(Degrees(-20.0))
+    )
+    assertEquals(
+      Longitude.unsafeMake(Degrees(-10.0)).average(Longitude.unsafeMake(Degrees(10.0))),
+      Longitude.unsafeMake(Degrees(0.0))
+    )
     // Average of 170 and 190 (which is -170) is 180.
-    assertEquals(Longitude.unsafeMake(Degrees(170.0)).average(Longitude.unsafeMake(Degrees(-170.0))), Longitude.unsafeMake(Degrees(180.0)))
+    assertEquals(
+      Longitude.unsafeMake(Degrees(170.0)).average(Longitude.unsafeMake(Degrees(-170.0))),
+      Longitude.unsafeMake(Degrees(180.0))
+    )
     // Average of 350 (which is -10) and 10 is 0.
-    assertEquals(Longitude.unsafeMake(Degrees(350.0)).average(Longitude.unsafeMake(Degrees(10.0))), Longitude.unsafeMake(Degrees(0.0)))
-    assertEquals(Longitude.unsafeMake(Degrees(10.0)).average(Longitude.unsafeMake(Degrees(10.0))), Longitude.unsafeMake(Degrees(10.0)))
+    assertEquals(
+      Longitude.unsafeMake(Degrees(350.0)).average(Longitude.unsafeMake(Degrees(10.0))),
+      Longitude.unsafeMake(Degrees(0.0))
+    )
+    assertEquals(
+      Longitude.unsafeMake(Degrees(10.0)).average(Longitude.unsafeMake(Degrees(10.0))),
+      Longitude.unsafeMake(Degrees(10.0))
+    )
   }
 
   test("Longitude + Angle should add and normalize to [-180, 180) correctly") {
-    val lon170 = Longitude.unsafeMake(Degrees(170.0))
+    val lon170        = Longitude.unsafeMake(Degrees(170.0))
     val lon_minus_170 = Longitude.unsafeMake(Degrees(-170.0))
-    val lon10 = Longitude.unsafeMake(Degrees(10.0))
+    val lon10         = Longitude.unsafeMake(Degrees(10.0))
 
     assertEquals(lon170 + Degrees(5.0), Longitude.unsafeMake(Degrees(175.0)), "Stays within bounds")
     assertEquals(lon170 + Degrees(20.0), Longitude.unsafeMake(Degrees(-170.0)), "Wraps eastward over antimeridian")
-    assertEquals(lon_minus_170 + Degrees(-20.0), Longitude.unsafeMake(Degrees(170.0)), "Wraps westward over antimeridian")
-    assertEquals(lon10 + Degrees(370.0), Longitude.unsafeMake(Degrees(20.0)), "Large angle wrapping: 10 + (370 % 360) = 10 + 10 = 20")
-    assertEquals(lon10 + Degrees(-370.0), Longitude.unsafeMake(Degrees(0.0)), "Large negative angle wrapping: 10 + (-370 % 360) = 10 - 10 = 0")
+    assertEquals(
+      lon_minus_170 + Degrees(-20.0),
+      Longitude.unsafeMake(Degrees(170.0)),
+      "Wraps westward over antimeridian"
+    )
+    assertEquals(
+      lon10 + Degrees(370.0),
+      Longitude.unsafeMake(Degrees(20.0)),
+      "Large angle wrapping: 10 + (370 % 360) = 10 + 10 = 20"
+    )
+    assertEquals(
+      lon10 + Degrees(-370.0),
+      Longitude.unsafeMake(Degrees(0.0)),
+      "Large negative angle wrapping: 10 + (-370 % 360) = 10 - 10 = 0"
+    )
   }
 
   test("Longitude - Angle should subtract and normalize to [-180, 180) correctly") {
-    val lon170 = Longitude.unsafeMake(Degrees(170.0))
+    val lon170        = Longitude.unsafeMake(Degrees(170.0))
     val lon_minus_170 = Longitude.unsafeMake(Degrees(-170.0))
 
     assertEquals(lon_minus_170 - Degrees(20.0), Longitude.unsafeMake(Degrees(170.0)), "-170 - 20 = -190 => 170")
@@ -176,9 +230,9 @@ class CoordinatesSuite extends munit.FunSuite {
   }
 
   test("Longitude.compare should correctly compare two longitudes (west to east)") {
-    val lon10 = Longitude.unsafeMake(Degrees(10.0))
-    val lon20 = Longitude.unsafeMake(Degrees(20.0))
-    val lon170 = Longitude.unsafeMake(Degrees(170.0))
+    val lon10         = Longitude.unsafeMake(Degrees(10.0))
+    val lon20         = Longitude.unsafeMake(Degrees(20.0))
+    val lon170        = Longitude.unsafeMake(Degrees(170.0))
     val lon_minus_170 = Longitude.unsafeMake(Degrees(-170.0)) // effectively 190
 
     assertEquals(lon10.compare(lon20), -1, "10E is west of 20E")
@@ -191,9 +245,9 @@ class CoordinatesSuite extends munit.FunSuite {
   }
 
   test("Longitude.min should return the more westerly longitude") {
-    val lon10 = Longitude.unsafeMake(Degrees(10.0))
-    val lon20 = Longitude.unsafeMake(Degrees(20.0))
-    val lon170 = Longitude.unsafeMake(Degrees(170.0))
+    val lon10         = Longitude.unsafeMake(Degrees(10.0))
+    val lon20         = Longitude.unsafeMake(Degrees(20.0))
+    val lon170        = Longitude.unsafeMake(Degrees(170.0))
     val lon_minus_170 = Longitude.unsafeMake(Degrees(-170.0))
 
     assertEquals(lon10.min(lon20), lon10)
@@ -201,9 +255,9 @@ class CoordinatesSuite extends munit.FunSuite {
   }
 
   test("Longitude.max should return the more easterly longitude") {
-    val lon10 = Longitude.unsafeMake(Degrees(10.0))
-    val lon20 = Longitude.unsafeMake(Degrees(20.0))
-    val lon170 = Longitude.unsafeMake(Degrees(170.0))
+    val lon10         = Longitude.unsafeMake(Degrees(10.0))
+    val lon20         = Longitude.unsafeMake(Degrees(20.0))
+    val lon170        = Longitude.unsafeMake(Degrees(170.0))
     val lon_minus_170 = Longitude.unsafeMake(Degrees(-170.0))
 
     assertEquals(lon10.max(lon20), lon20)
@@ -216,14 +270,14 @@ class CoordinatesSuite extends munit.FunSuite {
     // If `Longitude.unsafeMake` already normalizes to [-180,180), then `lon.unwrap` will be in that range.
     // Let's test its defined behavior based on the formula.
     // To properly test denormalize, we need to simulate an underlying Angle that is > 180.
-    // We can't directly do that with Longitude.unsafeMake if it normalizes. 
+    // We can't directly do that with Longitude.unsafeMake if it normalizes.
     // However, the `unwrap` gives the Angle, so we can construct an Angle outside the range.
 
     // Test case 1: Angle is 270 degrees. Denormalize should make it -90.
     val lon270 = Longitude.unsafeMake(Degrees(270.0)) // unsafeMake might normalize this to -90 already.
-                                                    // If so, lon270.unwrap is -90. Then denormalize does nothing. This is fine.
-                                                    // Let's check Coordinates.scala: Longitude extends Newtype[Angle]. 
-                                                    // Newtype itself doesn't normalize on unsafeMake. So Degrees(270.0) is preserved.
+    // If so, lon270.unwrap is -90. Then denormalize does nothing. This is fine.
+    // Let's check Coordinates.scala: Longitude extends Newtype[Angle].
+    // Newtype itself doesn't normalize on unsafeMake. So Degrees(270.0) is preserved.
     assertEquals(lon270.denormalize().unwrap.toDegrees, -90.0, 1e-9)
 
     // Test case 2: Angle is 170 degrees. Denormalize should do nothing.
@@ -247,7 +301,7 @@ class CoordinatesSuite extends munit.FunSuite {
 
   test("LatitudeKey.apply should create a key and preserve the Long value") {
     val rawValue = 1234567890L
-    val latKey = LatitudeKey(rawValue)
+    val latKey   = LatitudeKey(rawValue)
     // We can't directly access the underlying Long due to opaque type, but we can test conversions
     assertEquals(latKey.toDegrees, rawValue.toDouble / 1e6, 1e-9)
   }
@@ -256,14 +310,14 @@ class CoordinatesSuite extends munit.FunSuite {
     assertEquals(LatitudeKey.fromAngle(Degrees(0.0)), LatitudeKey(0L))
     assertEquals(LatitudeKey.fromAngle(Degrees(45.0)), LatitudeKey(45000000L))
     assertEquals(LatitudeKey.fromAngle(Degrees(-30.0)), LatitudeKey(-30000000L))
-    assertEquals(LatitudeKey.fromAngle(Degrees(12.345678)), LatitudeKey(12345678L)) // Truncation expected by toLong
+    assertEquals(LatitudeKey.fromAngle(Degrees(12.345678)), LatitudeKey(12345678L))  // Truncation expected by toLong
     assertEquals(LatitudeKey.fromAngle(Degrees(12.3456789)), LatitudeKey(12345678L)) // Truncation of .9
     assertEquals(LatitudeKey.fromAngle(Degrees(-12.345678)), LatitudeKey(-12345678L))
   }
 
   test("LatitudeKey.toAngle should convert key back to Angle (approximate)") {
     val originalAngle = Degrees(45.123456)
-    val latKey = LatitudeKey.fromAngle(originalAngle)
+    val latKey        = LatitudeKey.fromAngle(originalAngle)
     assertEquals(LatitudeKey.toAngle(latKey).toDegrees, originalAngle.toDegrees, 1e-9)
 
     val latKeyFromRaw = LatitudeKey(12345678L)
@@ -284,8 +338,8 @@ class CoordinatesSuite extends munit.FunSuite {
   }
 
   test("LatitudeKey should work correctly as a Map key") {
-    val key1 = LatitudeKey.fromAngle(Degrees(10.0))
-    val key2 = LatitudeKey.fromAngle(Degrees(20.0))
+    val key1     = LatitudeKey.fromAngle(Degrees(10.0))
+    val key2     = LatitudeKey.fromAngle(Degrees(20.0))
     val key1_dup = LatitudeKey(10000000L)
 
     val map = Map(key1 -> "Value1", key2 -> "Value2")
@@ -300,7 +354,7 @@ class CoordinatesSuite extends munit.FunSuite {
 
   test("LongitudeKey.apply should create a key and preserve the Long value") {
     val rawValue = 9876543210L
-    val lonKey = LongitudeKey(rawValue)
+    val lonKey   = LongitudeKey(rawValue)
     assertEquals(lonKey.toDegrees, rawValue.toDouble / 1e6, 1e-9)
   }
 
@@ -315,7 +369,7 @@ class CoordinatesSuite extends munit.FunSuite {
 
   test("LongitudeKey.toAngle should convert key back to Angle (approximate)") {
     val originalAngle = Degrees(120.987654)
-    val lonKey = LongitudeKey.fromAngle(originalAngle)
+    val lonKey        = LongitudeKey.fromAngle(originalAngle)
     assertEquals(LongitudeKey.toAngle(lonKey).toDegrees, originalAngle.toDegrees, 1e-9)
 
     val lonKeyFromRaw = LongitudeKey(88765432L)
@@ -336,8 +390,8 @@ class CoordinatesSuite extends munit.FunSuite {
   }
 
   test("LongitudeKey should work correctly as a Map key") {
-    val key1 = LongitudeKey.fromAngle(Degrees(90.0))
-    val key2 = LongitudeKey.fromAngle(Degrees(-90.0))
+    val key1     = LongitudeKey.fromAngle(Degrees(90.0))
+    val key2     = LongitudeKey.fromAngle(Degrees(-90.0))
     val key1_dup = LongitudeKey(90000000L)
 
     val map = Map(key1 -> "East90", key2 -> "West90")

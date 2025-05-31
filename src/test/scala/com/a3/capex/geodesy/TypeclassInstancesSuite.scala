@@ -2,15 +2,15 @@ package com.a3.capex.geodesy
 
 import munit.FunSuite
 import squants.space.{Angle, Length}
-import squants.space.AngleConversions._
-import squants.space.LengthConversions._
+import squants.space.AngleConversions.*
+import squants.space.LengthConversions.*
 import com.a3.capex.geodesy.Coordinates.{Latitude, Longitude}
-import com.a3.capex.geodesy.TypeclassInstances._ // Import the givens
+import com.a3.capex.geodesy.TypeclassInstances.* // Import the givens
 import com.a3.capex.geodesy.TypeclassInstances.{given_Ordering_Latitude, given_Ordering_Longitude}
 
 class TypeclassInstancesSuite extends FunSuite {
 
-  // --- Ordering Tests --- 
+  // --- Ordering Tests ---
 
   test("Ordering[Angle] should compare angles correctly") {
     val angleOrd = summon[Ordering[Angle]]
@@ -47,15 +47,15 @@ class TypeclassInstancesSuite extends FunSuite {
 
   test("Ordering[Longitude] should compare longitudes correctly (handles antimeridian)") {
     val lonOrd = summon[Ordering[Longitude]]
-    
-    val lon10E = Longitude.unsafeMake(10.degrees)
-    val lon20E = Longitude.unsafeMake(20.degrees)
-    val lon10W = Longitude.unsafeMake(-10.degrees)
-    val lon20W = Longitude.unsafeMake(-20.degrees)
-    val lon170E = Longitude.unsafeMake(170.degrees)
-    val lon170W = Longitude.unsafeMake(-170.degrees) // same as 190 degrees East
-    val lon0 = Longitude.unsafeMake(0.degrees)
-    val lon180 = Longitude.unsafeMake(180.degrees)
+
+    val lon10E      = Longitude.unsafeMake(10.degrees)
+    val lon20E      = Longitude.unsafeMake(20.degrees)
+    val lon10W      = Longitude.unsafeMake(-10.degrees)
+    val lon20W      = Longitude.unsafeMake(-20.degrees)
+    val lon170E     = Longitude.unsafeMake(170.degrees)
+    val lon170W     = Longitude.unsafeMake(-170.degrees) // same as 190 degrees East
+    val lon0        = Longitude.unsafeMake(0.degrees)
+    val lon180      = Longitude.unsafeMake(180.degrees)
     val lonMinus180 = Longitude.unsafeMake(-180.degrees) // same as 180 degrees
 
     // Standard comparisons
@@ -68,7 +68,7 @@ class TypeclassInstancesSuite extends FunSuite {
     // Antimeridian crossing
     assert(lonOrd.lt(lon170E, lon170W), "170E < -170W (170E is west of 190E)")
     assert(lonOrd.gt(lon170W, lon170E), "-170W > 170E (190E is east of 170E)")
-    
+
     // Comparisons with 0/180
     assert(lonOrd.lt(lon10W, lon10E), "-10W < 10E")
     assert(lonOrd.lt(lon0, lon10E), "0 < 10E")
@@ -76,10 +76,13 @@ class TypeclassInstancesSuite extends FunSuite {
     assert(lonOrd.lt(lon170E, lon180), "170E < 180")
     assert(lonOrd.lt(lon170E, lonMinus180), "170E < -180 (which is 180)")
     assert(lonOrd.equiv(lon180, lonMinus180), "180 == -180")
-    assert(lonOrd.gt(lon10W, lon180), "-10W > 180 (180 is west of -10W via shorter path)") // -10W is 350. 180 vs 350. (350-180+540)%360-180 = (170+540)%360-180 = 710%360-180 = 350-180 = 170. No, this is b-a. (180 - (-10) + 540)%360-180 = (190+540)%360-180 = 730%360-180 = 10-180 = -170. False. So 1. -10W > 180. Correct.
+    assert(
+      lonOrd.gt(lon10W, lon180),
+      "-10W > 180 (180 is west of -10W via shorter path)"
+    ) // -10W is 350. 180 vs 350. (350-180+540)%360-180 = (170+540)%360-180 = 710%360-180 = 350-180 = 170. No, this is b-a. (180 - (-10) + 540)%360-180 = (190+540)%360-180 = 730%360-180 = 10-180 = -170. False. So 1. -10W > 180. Correct.
   }
 
-  // --- Addable Tests --- 
+  // --- Addable Tests ---
 
   test("Addable[Angle] should combine angles and provide empty") {
     val angleAddable = summon[Addable[Angle]]

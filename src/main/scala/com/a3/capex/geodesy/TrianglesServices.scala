@@ -1,4 +1,3 @@
-
 package com.a3.capex.geodesy
 
 //import Coordinates._
@@ -10,8 +9,8 @@ package com.a3.capex.geodesy
 // // ,LatitudeOrder, LongitudeOrder
 //}
 //import ShapesCore.PointImplicits._
-import com.a3.capex.geodesy.ShapesCore._
-import com.a3.capex.geodesy.Triangles._
+import com.a3.capex.geodesy.ShapesCore.*
+import com.a3.capex.geodesy.Triangles.*
 //import com.a3.capex.geodesy.TinfourConverters._
 import com.a3.capex.geodesy.TinfourConverters.given_Conversion_Point_Vertex
 import com.a3.capex.geodesy.TinfourConverters.given_Conversion_Vertex_Point
@@ -30,13 +29,10 @@ object TrianglesServices:
   def Delaunay(vertexes: List[Point]): List[Triangle] =
     val tin = new IncrementalTin()
     vertexes.foreach(p => tin.add(p))
-    if (!tin.isBootstrapped) 
-      throw new RuntimeException("TIN failed to initialize (not enough points?)")
+    if !tin.isBootstrapped then throw new RuntimeException("TIN failed to initialize (not enough points?)")
     tin.triangles.asScala.map { st =>
       val p1: Point = st.getVertexA // Implicitly converts Vertex to Point
       val p2: Point = st.getVertexB // Implicitly converts Vertex to Point
       val p3: Point = st.getVertexC // Implicitly converts Vertex to Point
       Triangle(p1, p2, p3)
     }.toList
-
-

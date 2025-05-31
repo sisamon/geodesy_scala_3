@@ -1,13 +1,13 @@
 package com.a3.capex.geodesy
 
 import Coordinates.{Latitude, Longitude, R}
-import ShapesCore._
+import ShapesCore.*
 import TypeclassInstances.given
-import squants.space.{Angle, Length, Area, SquareMeters}
-import java.lang.Math._
+import squants.space.{Angle, Area, Length, SquareMeters}
+import java.lang.Math.*
 import scala.annotation.tailrec
 import neotype.unwrap
-import squants.space.AngleConversions._
+import squants.space.AngleConversions.*
 import scala.language.implicitConversions
 import squants.space.AreaConversions.AreaNumeric
 //import scala.math.Pi
@@ -15,7 +15,6 @@ import squants.space.AreaConversions.AreaNumeric
 // Type aliases for better readability
 type Lat = Latitude
 type Lon = Longitude
-
 
 object Triangles:
   //      val px1 = normalizeLongitude(longitude1).min(normalizeLongitude(geom.longitude1))
@@ -26,18 +25,16 @@ object Triangles:
   //      a - area
   //
 
-
   case class Triangle(p1: Point, p2: Point, p3: Point) extends CurvedShapes:
-    /**
-     * Calculates the barycenter (centroid) of the triangle.
-     * For geographic coordinates, this is a simple average of the vertices.
-     * Note: For large triangles, this is an approximation that doesn't account for
-     * the spherical nature of the Earth. For more accurate results, consider
-     * converting to 3D coordinates and calculating the centroid there.
-     */
+    /** Calculates the barycenter (centroid) of the triangle. For geographic coordinates, this is a simple average of
+      * the vertices. Note: For large triangles, this is an approximation that doesn't account for the spherical nature
+      * of the Earth. For more accurate results, consider converting to 3D coordinates and calculating the centroid
+      * there.
+      */
     override def barycenter: Point = {
       val avgLatVal = (p1.latitude.unwrap.toDegrees + p2.latitude.unwrap.toDegrees + p3.latitude.unwrap.toDegrees) / 3.0
-      val avgLonValDegrees = (p1.longitude.unwrap.toDegrees + p2.longitude.unwrap.toDegrees + p3.longitude.unwrap.toDegrees) / 3.0
+      val avgLonValDegrees =
+        (p1.longitude.unwrap.toDegrees + p2.longitude.unwrap.toDegrees + p3.longitude.unwrap.toDegrees) / 3.0
       // Normalize the average longitude to be within [-180, 180) degrees
       val normalizedAvgLonDegrees = ((avgLonValDegrees + 540) % 360) - 180
       // Adjust if the result of % is negative for negative inputs, ensuring it's truly in [-180, 180)
@@ -47,8 +44,8 @@ object Triangles:
       // A more robust normalization for [-180, 180) from any angle 'a': val norm = (a % 360 + 360) % 360; if (norm > 180) norm - 360 else norm
       val finalNormalizedLonDegrees = {
         var tempLon = avgLonValDegrees % 360
-        if (tempLon <= -180) tempLon += 360
-        else if (tempLon > 180) tempLon -= 360
+        if tempLon <= -180 then tempLon += 360
+        else if tempLon > 180 then tempLon -= 360
         tempLon
       }
       Point(Latitude.unsafeMake(avgLatVal.degrees), Longitude.unsafeMake(finalNormalizedLonDegrees.degrees))
@@ -57,25 +54,24 @@ object Triangles:
     /** Returns the easternmost longitude of the triangle */
     override def east: Lon =
       List(p1.longitude, p2.longitude, p3.longitude).max
-    
+
     /** Returns the northernmost latitude of the triangle */
     override def north: Lat =
       List(p1.latitude, p2.latitude, p3.latitude).max
-    
+
     /** Returns the southernmost latitude of the triangle */
     override def south: Lat =
       List(p1.latitude, p2.latitude, p3.latitude).min
-    
+
     /** Returns the westernmost longitude of the triangle */
     override def west: Lon =
       List(p1.longitude, p2.longitude, p3.longitude).min
 
-    override def toString: String = s"[$p1 , $p2 , $p3]"  //p1.toString + " , " + p2.toString + " , " + p3.toString
+    override def toString: String = s"[$p1 , $p2 , $p3]" // p1.toString + " , " + p2.toString + " , " + p3.toString
 
     // Some basic geometry that I will need to revisit.
     override def area: Area =
-      if p1 == p2 || p1 == p3 || p2 == p3 then
-        SquareMeters(0)
+      if p1 == p2 || p1 == p3 || p2 == p3 then SquareMeters(0)
       else
         // Convert latitudes and longitudes to radians for calculations
         val lat1_rad = p1.latitude.unwrap.toRadians
@@ -90,8 +86,8 @@ object Triangles:
 
         // Calculate side lengths (a, b, c) as angular distances (d/R) using Haversine formula
         def angularDistance(ptA_lat: Double, ptA_lon: Double, ptB_lat: Double, ptB_lon: Double): Double = {
-          val dLat = ptB_lat - ptA_lat
-          val dLon = ptB_lon - ptA_lon
+          val dLat     = ptB_lat - ptA_lat
+          val dLon     = ptB_lon - ptA_lon
           val hav_dLat = haversine(dLat)
           val hav_dLon = haversine(dLon)
           2 * asin(sqrt(hav_dLat + cos(ptA_lat) * cos(ptB_lat) * hav_dLon))
@@ -103,9 +99,9 @@ object Triangles:
 
         // Check for collinearity: if one side is approx sum of other two (in radians)
         // This handles cases where points are distinct but lie on the same great circle arc.
-        val sides = List(ang_a, ang_b, ang_c).sorted
-        val epsilonAngleRadians = 1E-8 // A small tolerance for floating point comparisons of angles in radians
-        if (abs(sides(2) - (sides(0) + sides(1))) < epsilonAngleRadians) {
+        val sides               = List(ang_a, ang_b, ang_c).sorted
+        val epsilonAngleRadians = 1e-8 // A small tolerance for floating point comparisons of angles in radians
+        if abs(sides(2) - (sides(0) + sides(1))) < epsilonAngleRadians then {
           return SquareMeters(0) // Collinear or nearly collinear
         }
 
@@ -117,7 +113,7 @@ object Triangles:
         }
 
         val alpha = calculateAngle(ang_a, ang_b, ang_c) // Angle at p1
-        val beta = calculateAngle(ang_b, ang_a, ang_c) // Angle at p2
+        val beta  = calculateAngle(ang_b, ang_a, ang_c) // Angle at p2
         val gamma = calculateAngle(ang_c, ang_a, ang_b) // Angle at p3
 
         // Spherical Excess (E)
@@ -129,21 +125,20 @@ object Triangles:
         val areaOnSphere = (R * R) * sphericalExcess // Squants: Area * Double = Area
         SquareMeters(areaOnSphere) // Convert to SquareMeters
 
-
 //        val lat1 = p1.latitude.unwrap.toDegrees
 //        val lon1 = p1.longitude.unwrap.toDegrees
 //        val lat2 = p2.latitude.unwrap.toDegrees
 //        val lon2 = p2.longitude.unwrap.toDegrees
 //        val lat3 = p3.latitude.unwrap.toDegrees
 //        val lon3 = p3.longitude.unwrap.toDegrees
-//        
+//
 //        // Using the shoelace formula for area calculation
 //        val areaValue = R * R * abs(
-//          lat1 * lon2 + 
-//          lat2 * lon3 + 
-//          lat3 * lon1 - 
-//          lat1 * lon3 - 
-//          lat2 * lon1 - 
+//          lat1 * lon2 +
+//          lat2 * lon3 +
+//          lat3 * lon1 -
+//          lat1 * lon3 -
+//          lat2 * lon1 -
 //          lat3 * lon2
 //        )
 //        SquareMeters(areaValue)
@@ -152,7 +147,7 @@ object Triangles:
     // We currently use the distance to the barycenter
     override def distance(pt: Point): Length = barycenter.distance(pt)
 
-//    override def distanceSquared(pt: Point): Double = 
+//    override def distanceSquared(pt: Point): Double =
 //      val dist = barycenter.distance(pt)
 //      dist * dist
 
@@ -162,9 +157,8 @@ object Triangles:
 
     def isDegenerate: Boolean = p1 == p2 || p1 == p3 || p2 == p3
 
-    /**
-     * Creates child triangles from a triangle 
-     */ 
+    /** Creates child triangles from a triangle
+      */
     def midTriangles: List[Triangle] =
       List(
         Triangle(p1, p1.middle(p2), p1.middle(p3)),
@@ -173,9 +167,9 @@ object Triangles:
         Triangle(p1.middle(p2), p2.middle(p3), p3.middle(p1))
       )
 
-//    This partition is legacy, probably i will not need it anymore. 
+//    This partition is legacy, probably i will not need it anymore.
 //    def partition(level: Int, puntosTriangulacion: Array[Point.PointKey]): List[Triangle] =
-    
+
 //    def maxsize: Boolean =
 //      val containsPoint = puntosTriangulacion.contains(t.p1.keyCoordinates) ||
 //        puntosTriangulacion.contains(t.p2.keyCoordinates) ||
@@ -190,41 +184,38 @@ object Triangles:
 //      val maxDistance = d1.max(d2).max(d3)
 //
 //      containsPoint && (maxDistance > 10.0)
-    
-    /**
-     * Creates child triangles from a parent triangle 
-     */
+
+    /** Creates child triangles from a parent triangle
+      */
     def partition(level: Int): List[Triangle] =
       @tailrec
-      def generateNthGeneration(remainingLevels: Int, currentGenerationTriangles: List[Triangle]): List[Triangle] = {
-        if (remainingLevels <= 0 || currentGenerationTriangles.isEmpty) {
+      def generateNthGeneration(remainingLevels: Int, currentGenerationTriangles: List[Triangle]): List[Triangle] =
+        if remainingLevels <= 0 || currentGenerationTriangles.isEmpty then {
           currentGenerationTriangles
         } else {
           val nextGeneration = currentGenerationTriangles.flatMap(_.midTriangles)
           generateNthGeneration(remainingLevels - 1, nextGeneration)
         }
-      }
 
-      if (level < 0) Nil // Or consider throwing an IllegalArgumentException for negative levels
-      else if (level == 0) List(this)
+      if level < 0 then Nil // Or consider throwing an IllegalArgumentException for negative levels
+      else if level == 0 then List(this)
       else generateNthGeneration(level, List(this))
-
+  end Triangle
 
   object Triangle:
-    /**
-     * Creates a degenerate triangle where all three vertices are the same point.
-     */
+    /** Creates a degenerate triangle where all three vertices are the same point.
+      */
     def apply(p: Point): Triangle = Triangle(p, p, p)
 
-    /**
-     * Equality instance for Triangle that uses structural equality.
-     * Two triangles are considered equal if they have the same three points,
-     * regardless of the order of the points.
-     */
+    /** Equality instance for Triangle that uses structural equality. Two triangles are considered equal if they have
+      * the same three points, regardless of the order of the points.
+      */
     given Equiv[Triangle] = Equiv.fromFunction { (t1, t2) =>
       val t1Points = Set(t1.p1, t1.p2, t1.p3)
       val t2Points = Set(t2.p1, t2.p2, t2.p3)
       t1Points == t2Points
     }
-    
+
     given CanEqual[Triangle, Triangle] = CanEqual.derived
+  end Triangle
+end Triangles

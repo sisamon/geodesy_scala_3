@@ -4,7 +4,7 @@ import munit.FunSuite
 import com.a3.capex.geodesy.ShapesCore.Point
 import com.a3.capex.geodesy.Coordinates.{Latitude, Longitude}
 import org.tinfour.common.Vertex
-import squants.space.AngleConversions._
+import squants.space.AngleConversions.*
 import com.a3.capex.geodesy.TinfourConverters.given_Conversion_Point_Vertex
 import com.a3.capex.geodesy.TinfourConverters.given_Conversion_Vertex_Point
 import neotype.unwrap // For accessing underlying values of Newtypes
@@ -12,7 +12,7 @@ import neotype.unwrap // For accessing underlying values of Newtypes
 class TinfourConvertersSuite extends FunSuite {
 
   test("Point to Vertex conversion") {
-    val point = Point(Latitude.unsafeMake(10.degrees), Longitude.unsafeMake(20.degrees))
+    val point          = Point(Latitude.unsafeMake(10.degrees), Longitude.unsafeMake(20.degrees))
     val vertex: Vertex = point // Implicit conversion
 
     assertEquals(vertex.getX, 20.0, "Vertex X should match Point longitude")
@@ -21,8 +21,8 @@ class TinfourConvertersSuite extends FunSuite {
   }
 
   test("Vertex to Point conversion") {
-    val vertex = new Vertex(45.0, 30.0, 5.0) // X is longitude, Y is latitude
-    val point: Point = vertex // Implicit conversion
+    val vertex       = new Vertex(45.0, 30.0, 5.0) // X is longitude, Y is latitude
+    val point: Point = vertex                      // Implicit conversion
 
     assertEquals(point.latitude.unwrap.toDegrees, 30.0, "Point latitude should match Vertex Y")
     assertEquals(point.longitude.unwrap.toDegrees, 45.0, "Point longitude should match Vertex X")
@@ -31,12 +31,22 @@ class TinfourConvertersSuite extends FunSuite {
 
   test("Round-trip conversion: Point -> Vertex -> Point") {
     val originalPoint = Point(Latitude.unsafeMake((-33.3).degrees), Longitude.unsafeMake(123.45.degrees))
-    
-    val vertexFromPoint: Vertex = originalPoint
+
+    val vertexFromPoint: Vertex     = originalPoint
     val finalPointFromVertex: Point = vertexFromPoint
 
     val tolerance = 1e-9 // Standard tolerance for floating-point comparisons
-    assertEqualsDouble(finalPointFromVertex.latitude.unwrap.toDegrees, originalPoint.latitude.unwrap.toDegrees, tolerance, "Latitude should match after round trip")
-    assertEqualsDouble(finalPointFromVertex.longitude.unwrap.toDegrees, originalPoint.longitude.unwrap.toDegrees, tolerance, "Longitude should match after round trip")
+    assertEqualsDouble(
+      finalPointFromVertex.latitude.unwrap.toDegrees,
+      originalPoint.latitude.unwrap.toDegrees,
+      tolerance,
+      "Latitude should match after round trip"
+    )
+    assertEqualsDouble(
+      finalPointFromVertex.longitude.unwrap.toDegrees,
+      originalPoint.longitude.unwrap.toDegrees,
+      tolerance,
+      "Longitude should match after round trip"
+    )
   }
 }
