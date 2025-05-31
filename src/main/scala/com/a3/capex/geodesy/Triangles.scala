@@ -35,8 +35,8 @@ object Triangles:
       val avgLatVal = (p1.latitude.unwrap.toDegrees + p2.latitude.unwrap.toDegrees + p3.latitude.unwrap.toDegrees) / 3.0
       val avgLonValDegrees =
         (p1.longitude.unwrap.toDegrees + p2.longitude.unwrap.toDegrees + p3.longitude.unwrap.toDegrees) / 3.0
-      // Normalize the average longitude to be within [-180, 180) degrees
-      val normalizedAvgLonDegrees = ((avgLonValDegrees + 540) % 360) - 180
+//      // Normalize the average longitude to be within [-180, 180) degrees
+//      val normalizedAvgLonDegrees = ((avgLonValDegrees + 540) % 360) - 180
       // Adjust if the result of % is negative for negative inputs, ensuring it's truly in [-180, 180)
       // Example: -190 -> ((-190 + 540) % 360) - 180 = (350 % 360) - 180 = 350 - 180 = 170. Correct.
       // Example: -550 -> ((-550 + 540) % 360) - 180 = (-10 % 360) - 180. In Scala, % can be negative.
